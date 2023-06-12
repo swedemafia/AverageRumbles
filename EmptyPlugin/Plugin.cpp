@@ -53,7 +53,7 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 
 				// Prompt user
 				DisplayDialog->Timestamp();
-				DisplayDialog->InsertFormattedText(YELLOW, "%d:%d (%dms)\r\n", AverageA, AverageB, ElapsedTime);
+				DisplayDialog->InsertFormattedText(YELLOW, "%d:%d\r\n", AverageA, AverageB);
 
 				// Set last values
 				LastA = AverageA;
