@@ -2,22 +2,91 @@
 
 DWORD WINAPI PluginThread(LPVOID Parameter)
 {
-	// TODO: Reevaluate this loop condition
+	unsigned int AverageA, AverageB;
+	unsigned int CountA, CountB;
+	unsigned int TotalA, TotalB;
+	unsigned int LastA, LastB;
+	unsigned int ElapsedTime = 0;
+
+	// Initialize variables
+	AverageA = AverageB = 0;
+	CountA = CountB = 0;
+	TotalA = TotalB = 0;
+	LastA = LastB = 0;
+
 	while (1) {
 
-		/* Add your code here */
+		if (API.EventPress(Controller::XB1_RT)) {
+			// Reset average rumbles and counters
+			CountA = CountB = 0;
+			LastA = LastB = 0;
+			TotalA = TotalB = 0;
 
-		// Sample code:
+			// Prompt user
+			DisplayDialog->Timestamp();
+			DisplayDialog->InsertFormattedText(GREEN, "Fire button pressed, beginning capture...\r\n");
 
-		if (API.EventPress(Controller::XB1_RT))
+		}
+		else if (API.EventRelease(Controller::XB1_RT)) {
 
-			if (API.GetInputValue(Controller::XB1_LT))
-				PluginInstance.WriteFormattedOutput(YELLOW, "ADS held & Fire pressed!\r\n");
-			else
-				PluginInstance.WriteFormattedOutput(YELLOW, "RT pressed; last release was %dms ago!\r\n", API.GetReleaseTime(Controller::XB1_RT));
-		
-		else if (API.EventRelease(Controller::XB1_RT))
-			PluginInstance.WriteFormattedOutput(YELLOW, "RT released; was held for %dms!\r\n", API.GetPressTime(Controller::XB1_RT));
+			// Prompt user
+			DisplayDialog->Timestamp();
+			DisplayDialog->InsertFormattedText(GREEN, "Fire button released, capture complete.\r\n");
+
+		}
+		else if (API.GetInputValue(Controller::XB1_RT)) {
+			
+			// Add to the total rumble values
+			TotalA += API.GetRumble(Controller::RumbleA);
+			TotalB += API.GetRumble(Controller::RumbleB);
+			
+			// Increment counter
+			CountA++;
+			CountB++;
+
+			// Get averages
+			AverageA = TotalA / CountA;
+			AverageB = TotalB / CountB;
+
+			// Output difference
+			if (AverageA != LastA) {
+
+				// Prompt user
+				DisplayDialog->Timestamp();
+				DisplayDialog->InsertFormattedText(YELLOW, "%d:%d (%dms)\r\n", AverageA, AverageB, ElapsedTime);
+
+				// Set last values
+				LastA = AverageA;
+				LastB = AverageB;
+			}
+			else {
+				ElapsedTime += API.GetVmSpeedValue();
+			}
+
+		}
+
+	}
+
+	return 0;
+}
+
+DWORD WINAPI DialogThread(LPVOID Parameter)
+{
+	MSG Message;
+
+	// Perform window message loop
+	while (GetMessage(&Message, NULL, 0, 0)) {
+
+		// Check if window is being terminated
+		if (Message.message == WM_QUIT) {
+			delete DisplayDialog;
+			break;
+		}
+		else {
+			// Dispatch window message
+			TranslateMessage(&Message);
+			DispatchMessage(&Message);
+		}
 	}
 
 	return 0;
@@ -33,8 +102,27 @@ BOOL Plugin::Initialize(void)
 		return FALSE;
 
 	/* Add any initialization code below here (return TRUE if successful, FALSE if not) */
+	DisplayDialog = new DisplayDialogManager(LibraryInstance, DIALOG_DISPLAY);
 
-	return TRUE;
+	// Make sure our class object was created
+	if (DisplayDialog != nullptr) {
+
+		// Show dialog
+		DisplayDialog->MakeDialog();
+
+		// Create window message thread
+		MessageThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DialogThread, NULL, 0, 0);
+
+		// Check if window message thread was created
+		if (MessageThread == INVALID_HANDLE_VALUE) {
+			delete DisplayDialog;
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void Plugin::Terminate(void)

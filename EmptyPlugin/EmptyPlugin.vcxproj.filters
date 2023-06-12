@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Display Dialog">
+      <UniqueIdentifier>{174cdb26-9bd0-4f2b-9fe1-7ab20432f5b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Display Dialog">
+      <UniqueIdentifier>{f950963d-178d-45d1-8c60-1532fa300517}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HookManager.h">
@@ -33,6 +39,15 @@
     <ClInclude Include="EmulatorPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DialogManager.h">
+      <Filter>Header Files\Display Dialog</Filter>
+    </ClInclude>
+    <ClInclude Include="DisplayDialog.h">
+      <Filter>Header Files\Display Dialog</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files\Display Dialog</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HookManager.cpp">
@@ -44,10 +59,18 @@
     <ClCompile Include="PluginMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DisplayDialog.cpp">
+      <Filter>Source Files\Display Dialog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="PluginExports.def">
       <Filter>Source Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AverageRumbles.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

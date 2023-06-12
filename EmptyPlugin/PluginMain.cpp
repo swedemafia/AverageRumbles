@@ -4,8 +4,11 @@
 // Modifying this file may cause the plugin to not load
 
 // Global objects
-EmulatorAPIManager API;
-Plugin PluginInstance;
+class DisplayDialogManager* DisplayDialog = nullptr;
+class EmulatorAPIManager API;
+class Plugin PluginInstance;
+HANDLE MessageThread = INVALID_HANDLE_VALUE;
+HINSTANCE LibraryInstance;
 
 static BOOL Initialized;
 
@@ -14,6 +17,7 @@ BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpvReserved)
 	switch (dwReason) {
 	case DLL_PROCESS_ATTACH:
 
+		LibraryInstance = hInstance;
 		DisableThreadLibraryCalls(hInstance);
 
 		break;
@@ -44,10 +48,6 @@ BOOL WINAPI PluginMain(PluginAPI::PluginInformation* Information)
 	// Set API addresses
 	// 
 	// UI:
-	//API.m_ProcessConsoleCommand		= Information->ProcessConsoleCommand;
-	//API.m_RefreshUserInput			= Information->RefreshUserInput;
-	//API.m_ResetCursorPosition		= Information->ResetCursorPosition;
-	//API.m_SetOutputColor			= Information->SetOutputColor;
 	API.m_WriteOutputString			= Information->WriteOutputString;
 	API.m_WriteOutputTimestamp		= Information->WriteOutputTimestamp;
 
