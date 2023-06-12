@@ -6,7 +6,6 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 	unsigned int CountA, CountB;
 	unsigned int TotalA, TotalB;
 	unsigned int LastA, LastB;
-	unsigned int ElapsedTime = 0;
 
 	// Initialize variables
 	AverageA = AverageB = 0;
@@ -58,9 +57,6 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 				// Set last values
 				LastA = AverageA;
 				LastB = AverageB;
-			}
-			else {
-				ElapsedTime += API.GetVmSpeedValue();
 			}
 
 		}
