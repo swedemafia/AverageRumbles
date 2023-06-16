@@ -1,11 +1,15 @@
 #include "PCH.h"
 
+BOOL RunThread = FALSE;
+
 DWORD WINAPI PluginThread(LPVOID Parameter)
 {
-	unsigned int AverageA, AverageB;
-	unsigned int CountA, CountB;
-	unsigned int TotalA, TotalB;
-	unsigned int LastA, LastB;
+	unsigned long AverageA, AverageB;
+	unsigned long RumbleA, RumbleB;
+	unsigned long CountA, CountB;
+	unsigned long TotalA, TotalB;
+	unsigned long LastA, LastB;
+	bool ShowRumble = false;
 
 	// Initialize variables
 	AverageA = AverageB = 0;
@@ -13,7 +17,7 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 	TotalA = TotalB = 0;
 	LastA = LastB = 0;
 
-	while (1) {
+	while (RunThread) {
 
 		if (API.EventPress(Controller::XB1_RT)) {
 			// Reset average rumbles and counters
@@ -33,12 +37,27 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 			DisplayDialog->InsertFormattedText(GREEN, "Fire button released, capture complete.\r\n");
 
 		}
+		/*else if (API.EventPress(Controller::XB1_X)) {
+			// Prompt user
+			DisplayDialog->Timestamp();
+			DisplayDialog->InsertFormattedText(GREEN, "Reload button pressed!\r\n");
+			ShowRumble = true;
+		}
+		else if (API.EventRelease(Controller::XB1_Y)) {
+			// Prompt user
+			DisplayDialog->Timestamp();
+			DisplayDialog->InsertFormattedText(GREEN, "Weapon button released!\r\n");
+			ShowRumble = true;
+		}*/
 		else if (API.GetInputValue(Controller::XB1_RT)) {
 			
 			// Add to the total rumble values
-			TotalA += API.GetRumble(Controller::RumbleA);
-			TotalB += API.GetRumble(Controller::RumbleB);
+			RumbleA = API.GetRumble(Controller::RumbleA);
+			RumbleB = API.GetRumble(Controller::RumbleB);
 			
+			TotalA += RumbleA;
+			TotalB += RumbleB;
+
 			// Increment counter
 			CountA++;
 			CountB++;
@@ -48,11 +67,13 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 			AverageB = TotalB / CountB;
 
 			// Output difference
-			if (AverageA != LastA) {
+			if ((AverageA != LastA) || (AverageB != LastB)) /* && ShowRumble == true*/ {
 
 				// Prompt user
 				DisplayDialog->Timestamp();
-				DisplayDialog->InsertFormattedText(YELLOW, "%d:%d\r\n", AverageA, AverageB);
+				DisplayDialog->InsertFormattedText(YELLOW, "%d:%d (actual: %d:%d)\r\n", AverageA, AverageB, RumbleA, RumbleB);
+
+				//ShowRumble = false;
 
 				// Set last values
 				LastA = AverageA;
@@ -62,6 +83,8 @@ DWORD WINAPI PluginThread(LPVOID Parameter)
 		}
 
 	}
+
+	ExitThread(0);
 
 	return 0;
 }
@@ -105,6 +128,8 @@ BOOL Plugin::Initialize(void)
 
 		// Show dialog
 		DisplayDialog->MakeDialog();
+		
+		RunThread = TRUE;
 
 		// Create window message thread
 		MessageThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DialogThread, NULL, 0, 0);
@@ -124,11 +149,14 @@ BOOL Plugin::Initialize(void)
 void Plugin::Terminate(void)
 {
 	// Close the PluginThread handle
-	if (PluginAPI::Thread != INVALID_HANDLE_VALUE)
+	if (PluginAPI::Thread != INVALID_HANDLE_VALUE) {
+		RunThread = FALSE;
 		CloseHandle(PluginAPI::Thread);
+	}
 
 	/* Add any termination code here */
-
+	DestroyWindow(DisplayDialog->Handle);
+	delete DisplayDialog;
 }
 
 // Command Hook
