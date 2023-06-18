@@ -113,6 +113,8 @@ DWORD WINAPI DialogThread(LPVOID Parameter)
 
 BOOL Plugin::Initialize(void)
 {
+	RunThread = TRUE;
+
 	// Create the main loop that can process controller input/output
 	PluginAPI::Thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)PluginThread, (LPVOID)this, 0, NULL);
 
@@ -128,8 +130,6 @@ BOOL Plugin::Initialize(void)
 
 		// Show dialog
 		DisplayDialog->MakeDialog();
-		
-		RunThread = TRUE;
 
 		// Create window message thread
 		MessageThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DialogThread, NULL, 0, 0);
